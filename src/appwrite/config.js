@@ -5,7 +5,7 @@ export class Service{
     client= new Client ();
     databases;
     bucket;
-    construtor(){
+    constructor(){
         this.client
         .setEndpoint(conf.appwriteUrl)
         .setProject(conf.appwriteProjectId);
@@ -79,7 +79,7 @@ export class Service{
             return await this.databases.listDocuments(
                 conf.appwriteDatabaseId,
                 conf.appwriteCollectionId,
-                queriess
+                queries
                 
             )
         } catch (error) {
@@ -123,5 +123,5 @@ export class Service{
     }
 }
 
-const service= new ServiceWorker()
+const service= new Service()
 export default service;
