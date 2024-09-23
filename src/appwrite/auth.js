@@ -30,19 +30,23 @@ export class AuthService {
 
     async login({email, password}) {
         try {
-            return await this.account.createEmailSession(email, password);
+            return await this.account.createEmailPasswordSession(email, password);
         } catch (error) {
             throw error;
         }
     }
-
     async getCurrentUser() {
         try {
+            const session = await this.account.getSession('current');
+            console.log("Active session found:", session);
             return await this.account.get();
         } catch (error) {
-            console.log("Appwrite serive :: getCurrentUser :: error", error);
+            console.log("Appwrite service :: getCurrentUser :: error", error);
+            if (error.response && error.response.code === 401) {
+                console.error("No active session. User is not logged in.");
+            }
         }
-
+    
         return null;
     }
 

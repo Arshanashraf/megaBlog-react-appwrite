@@ -15,7 +15,7 @@ function App() {
     authService.getCurrentUser()
     .then((userData)=>{
       if (userData){
-        dispath(login([userData]))
+        dispath(login({userData}))
       }else{
         dispath(logout())
       }
@@ -28,7 +28,7 @@ function App() {
       <div className='w-full block'>
         <Header/>
         <main>
-        TODO:  {/* <Outlet/> */}
+        TODO:   <Outlet/> 
         </main>
         <Footer/>
       </div>
