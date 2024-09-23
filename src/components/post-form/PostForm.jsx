@@ -4,6 +4,7 @@ import {Button , Input, Select ,RTE } from "../index"
 import appwriteService from "../../appwrite/config"
 import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
+import { v4 as uuidv4 } from 'uuid'; // Import uuid for generating IDs
 function PostForm({post}) {
     const {register, handleSubmit, watch, setValue, control, getValues} = useForm({
         defaultValues: {
@@ -14,7 +15,7 @@ function PostForm({post}) {
         }
     })
     const navigate = useNavigate()
-    const userData = useSelector(state => state.user.userData)
+    const userData = useSelector((state) => state.auth.userData)
 
     const submit = async (data) => {
         if (post) {
@@ -26,19 +27,22 @@ function PostForm({post}) {
             const dbPost = await appwriteService.updatePost(post.$id, {
                 ...data,
                 featuredImage : file ? file.$id : undefined
-            })
+            });
             if (dbPost) {
                 navigate('/post/${dbPost.$id}')
             }
         }else{
-            const file = await appwriteService.uploadFile(data.image[0]);
+            const newFile = await appwriteService.uploadFile(data.image[0]);
 
-            if (file) {
-                const file = file.$id
+            if (newFile) {
+                const fileId = newFile.$id
                 data.featuredImage = fileId
+                const documentId = uuidv4();
+                console.log("Document ID:", documentId);
                 const dbPost= await appwriteService.createPost({
                     ...data,
                     userId: userData.$id,
+                    documentId: documentId,
                 })
                 if (dbPost) {
                     navigate('/post/${}dbPost.$id')
