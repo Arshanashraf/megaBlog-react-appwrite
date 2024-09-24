@@ -1,6 +1,11 @@
 import conf from '../conf/conf'
 import { Client,ID,Databases,Storage,Query } from 'appwrite'
-
+function sanitizeSlug(slug) {
+    return slug
+        .toLowerCase()
+        .replace(/[^a-z0-9\-_\.]/g, '-')  // Replace invalid characters with hyphen
+        .substring(0, 36);  // Limit to 36 characters
+}
 export class Service{
     client= new Client ();
     databases;
@@ -12,16 +17,26 @@ export class Service{
         this.databases = new Databases(this.client);
         this.bucket = new Storage(this.client);
     }
-    async createPost({title,slug,content,featuredImage,status,userId}){
+    
+    async createPost({title,slug,content,feturedImage,status,userId}){
         try {
+            let sanitizedSlug = slug && slug.trim() !== '-' ? sanitizeSlug(slug) : sanitizeSlug(title);
+
+            // If sanitizedSlug is still empty after sanitation, generate a random ID
+            if (!sanitizedSlug) {
+                sanitizedSlug = ID.unique();
+            }
+    
+            console.log("Original Slug: ", slug);
+            console.log("Sanitized Slug: ", sanitizedSlug);
             return await this.databases.createDocument(
                 conf.appwriteDatabaseId,
                 conf.appwriteCollectionId,
-                slug,
+                sanitizedSlug,
                 {
                     title,
                     content,
-                    featuredImage,
+                    feturedImage,
                     status,
                     userId,
                 }
@@ -31,7 +46,7 @@ export class Service{
             
         }
     }
-    async updatePost(slug,{title,content,featuredImage,status}){
+    async updatePost(slug,{title,content,feturedImage,status}){
         try {
             return await this.databases.updateDocument(
                 conf.appwriteDatabaseId,
@@ -40,7 +55,7 @@ export class Service{
                 {
                     title,
                     content,
-                    featuredImage,
+                    feturedImage,
                     status
                 }
             )
@@ -115,11 +130,15 @@ export class Service{
         }
     }
 
-    getflePreview(fileId){
+    getFilePreview(fileId) {
+        if (!fileId || typeof fileId !== 'string') {
+            console.error("Invalid fileId provided:", fileId);
+            throw new Error("Invalid fileId");
+        }
         return this.bucket.getFilePreview(
             conf.appwriteBucketId,
             fileId,
-        )
+        );
     }
 }
 
